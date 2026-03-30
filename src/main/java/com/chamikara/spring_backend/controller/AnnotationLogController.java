@@ -18,7 +18,6 @@ import java.util.List;
 @Profile("legacy")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class AnnotationLogController {
     
     private final AnnotationLogService annotationLogService;

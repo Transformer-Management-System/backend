@@ -17,7 +17,6 @@ import java.util.List;
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class AnnotationController {
     
     private final AnnotationService annotationService;

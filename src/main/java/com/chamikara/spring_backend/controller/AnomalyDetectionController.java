@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/inspections")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class AnomalyDetectionController {
     
     private final AnomalyDetectionService anomalyDetectionService;

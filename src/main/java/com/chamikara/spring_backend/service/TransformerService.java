@@ -6,6 +6,7 @@ import com.chamikara.spring_backend.entity.Transformer;
 import com.chamikara.spring_backend.exception.ResourceNotFoundException;
 import com.chamikara.spring_backend.exception.DuplicateResourceException;
 import com.chamikara.spring_backend.repository.TransformerRepository;
+import com.chamikara.spring_backend.security.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class TransformerService {
     
     private final TransformerRepository transformerRepository;
+    private final CurrentUserService currentUserService;
     
     public List<TransformerResponse> getAllTransformers() {
         log.debug("Fetching all transformers");
@@ -38,12 +40,14 @@ public class TransformerService {
     
     public TransformerResponse createTransformer(TransformerRequest request) {
         log.debug("Creating new transformer with number: {}", request.getNumber());
+        Long currentUserId = currentUserService.getCurrentUserId();
         
         if (transformerRepository.existsByNumber(request.getNumber())) {
             throw new DuplicateResourceException("Transformer", "number", request.getNumber());
         }
         
         Transformer transformer = Transformer.builder()
+                .userId(currentUserId)
                 .number(request.getNumber())
                 .pole(request.getPole())
                 .region(request.getRegion())
@@ -54,7 +58,7 @@ public class TransformerService {
                 .build();
         
         Transformer saved = transformerRepository.save(transformer);
-        log.info("Created transformer with id: {}", saved.getId());
+        log.info("Created transformer with id: {} for local user: {}", saved.getId(), currentUserId);
         return mapToResponse(saved);
     }
     

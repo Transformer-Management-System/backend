@@ -6,6 +6,7 @@ import com.chamikara.spring_backend.entity.Annotation;
 import com.chamikara.spring_backend.entity.Inspection;
 import com.chamikara.spring_backend.exception.ResourceNotFoundException;
 import com.chamikara.spring_backend.repository.AnnotationRepository;
+import com.chamikara.spring_backend.security.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class AnnotationService {
     
     private final AnnotationRepository annotationRepository;
     private final InspectionService inspectionService;
+    private final CurrentUserService currentUserService;
     
     public List<AnnotationResponse> getAnnotationsByInspectionId(Long inspectionId) {
         log.debug("Fetching annotations for inspection: {}", inspectionId);
@@ -37,11 +39,12 @@ public class AnnotationService {
         log.debug("Creating anomaly for inspection: {}", inspectionId);
 
         Inspection inspection = inspectionService.getInspectionEntity(inspectionId);
+        Long fallbackUserId = currentUserService.getCurrentUserIdOrNull();
         Annotation annotation = Annotation.builder()
                 .inspection(inspection)
                 .build();
 
-        updateAnnotationFields(annotation, request, parseUserId(request.getUserId()));
+        updateAnnotationFields(annotation, request, fallbackUserId);
 
         Annotation saved = annotationRepository.save(annotation);
         log.info("Created anomaly with id: {} for inspection: {}", saved.getId(), inspectionId);
@@ -54,7 +57,7 @@ public class AnnotationService {
         Annotation annotation = annotationRepository.findById(anomalyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Anomaly", "id", anomalyId));
 
-        updateAnnotationFields(annotation, request, parseUserId(request.getUserId()));
+        updateAnnotationFields(annotation, request, currentUserService.getCurrentUserIdOrNull());
 
         Annotation updated = annotationRepository.save(annotation);
         log.info("Updated anomaly with id: {}", anomalyId);

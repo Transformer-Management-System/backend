@@ -21,7 +21,6 @@ import java.util.List;
 @Profile("legacy")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class MaintenanceRecordController {
     
     private final MaintenanceRecordService maintenanceRecordService;

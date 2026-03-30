@@ -3,12 +3,14 @@ package com.chamikara.spring_backend.controller;
 import com.chamikara.spring_backend.dto.request.TransformerRequest;
 import com.chamikara.spring_backend.dto.response.ApiResponse;
 import com.chamikara.spring_backend.dto.response.TransformerResponse;
+import com.chamikara.spring_backend.security.AuthenticatedUser;
 import com.chamikara.spring_backend.service.TransformerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +19,6 @@ import java.util.List;
 @RequestMapping("/api/v1/transformers")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class TransformerController {
     
     private final TransformerService transformerService;
@@ -38,8 +39,11 @@ public class TransformerController {
     
     @PostMapping
     public ResponseEntity<ApiResponse<TransformerResponse>> createTransformer(
+            @AuthenticationPrincipal AuthenticatedUser currentUser,
             @Valid @RequestBody TransformerRequest request) {
-        log.info("POST /transformers - Creating new transformer: {}", request.getNumber());
+        log.info("POST /transformers - Creating new transformer: {} by local user: {}",
+            request.getNumber(),
+            currentUser != null ? currentUser.localUserId() : null);
         TransformerResponse created = transformerService.createTransformer(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Transformer created successfully", created));

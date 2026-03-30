@@ -6,6 +6,7 @@ import com.chamikara.spring_backend.entity.Inspection;
 import com.chamikara.spring_backend.entity.Transformer;
 import com.chamikara.spring_backend.exception.ResourceNotFoundException;
 import com.chamikara.spring_backend.repository.InspectionRepository;
+import com.chamikara.spring_backend.security.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class InspectionService {
     
     private final InspectionRepository inspectionRepository;
     private final TransformerService transformerService;
+    private final CurrentUserService currentUserService;
     
     public List<InspectionResponse> getAllInspections() {
         log.debug("Fetching all inspections");
@@ -48,6 +50,7 @@ public class InspectionService {
     
     public InspectionResponse createInspection(Long transformerId, InspectionRequest request) {
         log.debug("Creating new inspection for transformer: {}", transformerId);
+        Long currentUserId = currentUserService.getCurrentUserIdOrNull();
         
         Transformer transformer = transformerService.getTransformerEntity(transformerId);
         LocalDate inspectionDate = resolveInspectionDate(request);
@@ -66,7 +69,7 @@ public class InspectionService {
                 .build();
         
         Inspection saved = inspectionRepository.save(inspection);
-        log.info("Created inspection with id: {}", saved.getId());
+        log.info("Created inspection with id: {} by local user: {}", saved.getId(), currentUserId);
         return mapToResponse(saved);
     }
     
