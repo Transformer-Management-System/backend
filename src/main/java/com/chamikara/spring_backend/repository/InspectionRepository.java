@@ -15,7 +15,7 @@ public interface InspectionRepository extends JpaRepository<Inspection, Long> {
     
     List<Inspection> findByStatus(String status);
     
-    @Query("SELECT i FROM Inspection i WHERE i.transformer.id = :transformerId ORDER BY i.date DESC")
+    @Query("SELECT i FROM Inspection i WHERE i.transformer.id = :transformerId ORDER BY i.inspectionDate DESC")
     List<Inspection> findByTransformerIdOrderByDateDesc(@Param("transformerId") Long transformerId);
     
     @Query("SELECT i FROM Inspection i JOIN FETCH i.transformer")

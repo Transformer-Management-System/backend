@@ -7,6 +7,7 @@ import com.chamikara.spring_backend.service.MaintenanceRecordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,7 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/records")
+@RequestMapping("/api/v1/records")
+@Profile("legacy")
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin(origins = "*")

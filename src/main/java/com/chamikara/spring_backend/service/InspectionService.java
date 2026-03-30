@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,24 +46,23 @@ public class InspectionService {
                 .collect(Collectors.toList());
     }
     
-    public InspectionResponse createInspection(InspectionRequest request) {
-        log.debug("Creating new inspection for transformer: {}", request.getTransformerId());
+    public InspectionResponse createInspection(Long transformerId, InspectionRequest request) {
+        log.debug("Creating new inspection for transformer: {}", transformerId);
         
-        Transformer transformer = transformerService.getTransformerEntity(request.getTransformerId());
+        Transformer transformer = transformerService.getTransformerEntity(transformerId);
+        LocalDate inspectionDate = resolveInspectionDate(request);
+
+        if (request.getInspector() == null || request.getInspector().isBlank()) {
+            throw new IllegalArgumentException("Inspector name is required");
+        }
         
         Inspection inspection = Inspection.builder()
                 .transformer(transformer)
-                .date(request.getDate())
-                .inspectedDate(request.getInspectedDate())
                 .inspector(request.getInspector())
+                .inspectionDate(inspectionDate)
                 .notes(request.getNotes())
-                .status(request.getStatus() != null ? request.getStatus() : "Pending")
-                .maintenanceImage(request.getMaintenanceImage())
-                .maintenanceUploadDate(request.getMaintenanceUploadDate())
-                .maintenanceWeather(request.getMaintenanceWeather())
-                .annotatedImage(request.getAnnotatedImage())
-                .anomalies(request.getAnomalies())
-                .progressStatus(request.getProgressStatus())
+                .status(request.getStatus() != null ? request.getStatus() : "SCHEDULED")
+                .inspectionImageKey(resolveInspectionImageKey(request))
                 .build();
         
         Inspection saved = inspectionRepository.save(inspection);
@@ -81,17 +82,15 @@ public class InspectionService {
             inspection.setTransformer(transformer);
         }
         
-        if (request.getDate() != null) inspection.setDate(request.getDate());
-        if (request.getInspectedDate() != null) inspection.setInspectedDate(request.getInspectedDate());
+        if (request.getDate() != null || request.getInspectedDate() != null) {
+            inspection.setInspectionDate(resolveInspectionDate(request));
+        }
         if (request.getInspector() != null) inspection.setInspector(request.getInspector());
         if (request.getNotes() != null) inspection.setNotes(request.getNotes());
         if (request.getStatus() != null) inspection.setStatus(request.getStatus());
-        if (request.getMaintenanceImage() != null) inspection.setMaintenanceImage(request.getMaintenanceImage());
-        if (request.getMaintenanceUploadDate() != null) inspection.setMaintenanceUploadDate(request.getMaintenanceUploadDate());
-        if (request.getMaintenanceWeather() != null) inspection.setMaintenanceWeather(request.getMaintenanceWeather());
-        if (request.getAnnotatedImage() != null) inspection.setAnnotatedImage(request.getAnnotatedImage());
-        if (request.getAnomalies() != null) inspection.setAnomalies(request.getAnomalies());
-        if (request.getProgressStatus() != null) inspection.setProgressStatus(request.getProgressStatus());
+        if (request.getMaintenanceImage() != null || request.getAnnotatedImage() != null) {
+            inspection.setInspectionImageKey(resolveInspectionImageKey(request));
+        }
         
         Inspection updated = inspectionRepository.save(inspection);
         log.info("Updated inspection with id: {}", id);
@@ -115,21 +114,41 @@ public class InspectionService {
     }
     
     private InspectionResponse mapToResponse(Inspection inspection) {
+        String dateValue = inspection.getInspectionDate() != null ? inspection.getInspectionDate().toString() : null;
         return InspectionResponse.builder()
                 .id(inspection.getId())
                 .transformerId(inspection.getTransformer().getId())
                 .transformerNumber(inspection.getTransformer().getNumber())
-                .date(inspection.getDate())
-                .inspectedDate(inspection.getInspectedDate())
+                .date(dateValue)
+                .inspectedDate(dateValue)
                 .inspector(inspection.getInspector())
                 .notes(inspection.getNotes())
                 .status(inspection.getStatus())
-                .maintenanceImage(inspection.getMaintenanceImage())
-                .maintenanceUploadDate(inspection.getMaintenanceUploadDate())
-                .maintenanceWeather(inspection.getMaintenanceWeather())
-                .annotatedImage(inspection.getAnnotatedImage())
-                .anomalies(inspection.getAnomalies())
-                .progressStatus(inspection.getProgressStatus())
+                .maintenanceImage(inspection.getInspectionImageKey())
+                .annotatedImage(inspection.getInspectionImageKey())
                 .build();
+    }
+
+    private LocalDate resolveInspectionDate(InspectionRequest request) {
+        String rawDate = request.getInspectedDate() != null && !request.getInspectedDate().isBlank()
+                ? request.getInspectedDate()
+                : request.getDate();
+
+        if (rawDate == null || rawDate.isBlank()) {
+            throw new IllegalArgumentException("Inspection date is required (use date or inspectedDate)");
+        }
+
+        try {
+            return LocalDate.parse(rawDate);
+        } catch (DateTimeParseException ex) {
+            throw new IllegalArgumentException("Inspection date must be in yyyy-MM-dd format");
+        }
+    }
+
+    private String resolveInspectionImageKey(InspectionRequest request) {
+        if (request.getMaintenanceImage() != null && !request.getMaintenanceImage().isBlank()) {
+            return request.getMaintenanceImage();
+        }
+        return request.getAnnotatedImage();
     }
 }

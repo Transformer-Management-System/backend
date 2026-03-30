@@ -5,6 +5,7 @@ import com.chamikara.spring_backend.dto.response.AnnotationLogResponse;
 import com.chamikara.spring_backend.service.AnnotationLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/annotation-logs")
+@RequestMapping("/api/v1/annotation-logs")
+@Profile("legacy")
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin(origins = "*")

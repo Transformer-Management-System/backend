@@ -49,7 +49,6 @@ public class TransformerService {
                 .region(request.getRegion())
                 .type(request.getType())
                 .baselineImage(request.getBaselineImage())
-                .baselineUploadDate(request.getBaselineUploadDate())
                 .weather(request.getWeather())
                 .location(request.getLocation())
                 .build();
@@ -76,7 +75,6 @@ public class TransformerService {
         transformer.setRegion(request.getRegion());
         transformer.setType(request.getType());
         transformer.setBaselineImage(request.getBaselineImage());
-        transformer.setBaselineUploadDate(request.getBaselineUploadDate());
         transformer.setWeather(request.getWeather());
         transformer.setLocation(request.getLocation());
         
@@ -109,7 +107,7 @@ public class TransformerService {
                 .region(transformer.getRegion())
                 .type(transformer.getType())
                 .baselineImage(transformer.getBaselineImage())
-                .baselineUploadDate(transformer.getBaselineUploadDate())
+                .baselineUploadDate(transformer.getCreatedAt() != null ? transformer.getCreatedAt().toString() : null)
                 .weather(transformer.getWeather())
                 .location(transformer.getLocation())
                 .inspectionCount(transformer.getInspections() != null ? transformer.getInspections().size() : 0)

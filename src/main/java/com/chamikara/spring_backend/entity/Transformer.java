@@ -18,29 +18,33 @@ public class Transformer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "user_id")
+    private Long userId;
+
+    @Column(name = "transformer_number", unique = true, nullable = false)
     private String number;
 
+    @Column(name = "pole_number")
     private String pole;
 
     private String region;
 
     private String type;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "baseline_image_key")
     private String baselineImage;
-
-    private String baselineUploadDate;
 
     private String weather;
 
     private String location;
 
-    @OneToMany(mappedBy = "transformer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Inspection> inspections = new ArrayList<>();
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", insertable = false, updatable = false)
+    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "transformer", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<MaintenanceRecord> maintenanceRecords = new ArrayList<>();
+    private List<Inspection> inspections = new ArrayList<>();
 }

@@ -1,6 +1,6 @@
 package com.chamikara.spring_backend.dto.request;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,13 +12,13 @@ import lombok.NoArgsConstructor;
 @Builder
 public class InspectionRequest {
     
-    @NotNull(message = "Transformer ID is required")
     private Long transformerId;
     
     private String date;
     
     private String inspectedDate;
     
+    @NotBlank(message = "Inspector name is required")
     private String inspector;
     
     private String notes;

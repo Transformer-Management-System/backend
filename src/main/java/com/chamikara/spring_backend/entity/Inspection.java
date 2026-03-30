@@ -2,6 +2,8 @@ package com.chamikara.spring_backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,48 +20,33 @@ public class Inspection {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "transformer_id", nullable = false)
+    @JoinColumn(name = "transformer_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Transformer transformer;
 
-    private String date;
-
-    private String inspectedDate;
-
+    @Column(name = "inspector_name", nullable = false)
     private String inspector;
+
+    @Column(name = "inspection_date", nullable = false)
+    private LocalDate inspectionDate;
 
     @Column(columnDefinition = "TEXT")
     private String notes;
 
+    @Column(name = "status")
     @Builder.Default
-    private String status = "Pending";
+    private String status = "SCHEDULED";
 
-    @Column(columnDefinition = "TEXT")
-    private String maintenanceImage;
+    @Column(name = "inspection_image_key")
+    private String inspectionImageKey;
 
-    private String maintenanceUploadDate;
-
-    private String maintenanceWeather;
-
-    @Column(columnDefinition = "TEXT")
-    private String annotatedImage;
-
-    @Column(columnDefinition = "TEXT")
-    private String anomalies; // Stored as JSON string
-
-    @Column(columnDefinition = "TEXT")
-    private String progressStatus; // Stored as JSON string
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "inspection", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Annotation> annotations = new ArrayList<>();
-
-    @OneToMany(mappedBy = "inspection", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private List<AnnotationLog> annotationLogs = new ArrayList<>();
 }

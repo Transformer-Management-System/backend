@@ -1,85 +1,56 @@
 package com.chamikara.spring_backend.controller;
 
+import com.chamikara.spring_backend.dto.request.InspectionAnalysisRequest;
 import com.chamikara.spring_backend.dto.response.AnomalyDetectionResponse;
 import com.chamikara.spring_backend.dto.response.ApiResponse;
 import com.chamikara.spring_backend.service.AnomalyDetectionService;
+import com.chamikara.spring_backend.service.InspectionService;
+import com.chamikara.spring_backend.service.TransformerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
-@RequestMapping("/anomaly-detection")
+@RequestMapping("/api/v1/inspections")
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin(origins = "*")
 public class AnomalyDetectionController {
     
     private final AnomalyDetectionService anomalyDetectionService;
+    private final InspectionService inspectionService;
+    private final TransformerService transformerService;
     
-    /**
-     * Detect anomalies by comparing baseline and maintenance images
-     * 
-     * Request body should contain:
-     * - transformerId: String (required)
-     * - baselineImage: String - Base64 encoded image (required)
-     * - maintenanceImage: String - Base64 encoded image (required)
-     * - sliderPercent: Double - Optional threshold adjustment
-     */
-    @PostMapping("/detect")
-    public ResponseEntity<ApiResponse<AnomalyDetectionResponse>> detectAnomalies(
-            @RequestBody Map<String, Object> request) {
-        
-        String transformerId = (String) request.get("transformerId");
-        String baselineImage = (String) request.get("baselineImage");
-        String maintenanceImage = (String) request.get("maintenanceImage");
-        Double sliderPercent = request.get("sliderPercent") != null 
-                ? ((Number) request.get("sliderPercent")).doubleValue() 
-                : null;
-        
-        log.info("POST /anomaly-detection/detect - Detecting anomalies for transformer: {}", transformerId);
-        
-        if (transformerId == null || transformerId.isEmpty()) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Transformer ID is required"));
-        }
-        
+    @PostMapping("/{id}/analyze")
+    public ResponseEntity<ApiResponse<AnomalyDetectionResponse>> analyzeInspection(
+            @PathVariable Long id,
+            @RequestBody(required = false) InspectionAnalysisRequest request) {
+
+        Double sliderPercent = request != null ? request.getSliderPercent() : null;
+
+        log.info("POST /api/v1/inspections/{}/analyze - Triggering analysis", id);
+
+        var inspection = inspectionService.getInspectionById(id);
+        var transformer = transformerService.getTransformerById(inspection.getTransformerId());
+
+        String transformerId = transformer.getNumber();
+        String baselineImage = transformer.getBaselineImage();
+        String maintenanceImage = inspection.getMaintenanceImage();
+
         if (baselineImage == null || baselineImage.isEmpty()) {
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Baseline image is required"));
+                    .body(ApiResponse.error("Baseline image is missing for the inspection's transformer"));
         }
-        
+
         if (maintenanceImage == null || maintenanceImage.isEmpty()) {
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Maintenance image is required"));
+                    .body(ApiResponse.error("Inspection image is missing for analysis"));
         }
-        
+
         AnomalyDetectionResponse response = anomalyDetectionService.detectAnomalies(
                 transformerId, baselineImage, maintenanceImage, sliderPercent);
-        
-        return ResponseEntity.ok(ApiResponse.success("Anomaly detection completed", response));
-    }
-    
-    /**
-     * Health check endpoint for the FastAPI anomaly detection service
-     */
-    @GetMapping("/health")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> checkServiceHealth() {
-        log.info("GET /anomaly-detection/health - Checking FastAPI service health");
-        
-        boolean isHealthy = anomalyDetectionService.isServiceHealthy();
-        
-        Map<String, Object> healthStatus = Map.of(
-                "fastApiService", isHealthy ? "healthy" : "unhealthy",
-                "status", isHealthy ? "All services operational" : "FastAPI service is down"
-        );
-        
-        if (isHealthy) {
-            return ResponseEntity.ok(ApiResponse.success("Service health check passed", healthStatus));
-        } else {
-            return ResponseEntity.ok(ApiResponse.error("FastAPI service is not available"));
-        }
+
+        return ResponseEntity.ok(ApiResponse.success("Inspection analysis completed", response));
     }
 }

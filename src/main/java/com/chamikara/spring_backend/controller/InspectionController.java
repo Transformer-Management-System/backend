@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/inspections")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin(origins = "*")
@@ -22,49 +22,43 @@ public class InspectionController {
     
     private final InspectionService inspectionService;
     
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<InspectionResponse>>> getAllInspections() {
-        log.info("GET /inspections - Fetching all inspections");
-        List<InspectionResponse> inspections = inspectionService.getAllInspections();
-        return ResponseEntity.ok(ApiResponse.success("Inspections retrieved successfully", inspections));
-    }
-    
-    @GetMapping("/{id}")
+    @GetMapping("/inspections/{id}")
     public ResponseEntity<ApiResponse<InspectionResponse>> getInspectionById(@PathVariable Long id) {
-        log.info("GET /inspections/{} - Fetching inspection", id);
+        log.info("GET /api/v1/inspections/{} - Fetching inspection", id);
         InspectionResponse inspection = inspectionService.getInspectionById(id);
         return ResponseEntity.ok(ApiResponse.success("Inspection retrieved successfully", inspection));
     }
     
-    @GetMapping("/transformer/{transformerId}")
+    @GetMapping("/transformers/{transformerId}/inspections")
     public ResponseEntity<ApiResponse<List<InspectionResponse>>> getInspectionsByTransformerId(
             @PathVariable Long transformerId) {
-        log.info("GET /inspections/transformer/{} - Fetching inspections", transformerId);
+        log.info("GET /api/v1/transformers/{}/inspections - Fetching inspections", transformerId);
         List<InspectionResponse> inspections = inspectionService.getInspectionsByTransformerId(transformerId);
         return ResponseEntity.ok(ApiResponse.success("Inspections retrieved successfully", inspections));
     }
     
-    @PostMapping
+    @PostMapping("/transformers/{transformerId}/inspections")
     public ResponseEntity<ApiResponse<InspectionResponse>> createInspection(
+            @PathVariable Long transformerId,
             @Valid @RequestBody InspectionRequest request) {
-        log.info("POST /inspections - Creating new inspection for transformer: {}", request.getTransformerId());
-        InspectionResponse created = inspectionService.createInspection(request);
+        log.info("POST /api/v1/transformers/{}/inspections - Creating inspection", transformerId);
+        InspectionResponse created = inspectionService.createInspection(transformerId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Inspection created successfully", created));
     }
     
-    @PutMapping("/{id}")
+    @PutMapping("/inspections/{id}")
     public ResponseEntity<ApiResponse<InspectionResponse>> updateInspection(
             @PathVariable Long id,
             @RequestBody InspectionRequest request) {
-        log.info("PUT /inspections/{} - Updating inspection", id);
+        log.info("PUT /api/v1/inspections/{} - Updating inspection", id);
         InspectionResponse updated = inspectionService.updateInspection(id, request);
         return ResponseEntity.ok(ApiResponse.success("Inspection updated successfully", updated));
     }
     
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/inspections/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteInspection(@PathVariable Long id) {
-        log.info("DELETE /inspections/{} - Deleting inspection", id);
+        log.info("DELETE /api/v1/inspections/{} - Deleting inspection", id);
         inspectionService.deleteInspection(id);
         return ResponseEntity.ok(ApiResponse.success("Inspection deleted successfully", null));
     }

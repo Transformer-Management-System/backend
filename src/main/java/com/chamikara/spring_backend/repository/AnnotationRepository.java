@@ -11,12 +11,10 @@ import java.util.Optional;
 public interface AnnotationRepository extends JpaRepository<Annotation, Long> {
     
     List<Annotation> findByInspectionId(Long inspectionId);
-    
-    List<Annotation> findByInspectionIdAndDeletedFalse(Long inspectionId);
-    
-    Optional<Annotation> findByAnnotationId(String annotationId);
+
+    List<Annotation> findByInspectionIdOrderByCreatedAtAsc(Long inspectionId);
+
+    Optional<Annotation> findByIdAndInspectionId(Long id, Long inspectionId);
     
     void deleteByInspectionId(Long inspectionId);
-    
-    List<Annotation> findBySource(String source);
 }

@@ -2,10 +2,14 @@ package com.chamikara.spring_backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
-@Table(name = "annotations")
+@Table(name = "anomalies")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,47 +21,31 @@ public class Annotation {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inspection_id", nullable = false)
+    @JoinColumn(name = "inspection_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Inspection inspection;
 
-    @Column(name = "annotation_id", unique = true, nullable = false)
-    private String annotationId; // The unique ID from frontend (e.g., 'ai_1', 'user_123')
+    @Column(name = "label")
+    private String label;
 
-    @Column(nullable = false)
-    private Double x;
+    @Column(name = "confidence_score", precision = 5, scale = 4)
+    private BigDecimal confidenceScore;
 
-    @Column(nullable = false)
-    private Double y;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "bounding_box")
+    private Map<String, Double> boundingBox;
 
-    @Column(nullable = false)
-    private Double w;
-
-    @Column(nullable = false)
-    private Double h;
-
-    private Double confidence;
-
-    private String severity;
-
-    private String classification;
-
-    @Column(columnDefinition = "TEXT")
-    private String comment;
-
-    @Column(nullable = false)
-    private String source; // 'ai' or 'user'
-
+    @Column(name = "is_manually_verified")
     @Builder.Default
-    private Boolean deleted = false;
+    private Boolean manuallyVerified = false;
 
-    @Builder.Default
-    private String userId = "Admin";
+    @Column(name = "verified_by_user_id")
+    private Long verifiedByUserId;
 
-    @Column(nullable = false)
-    private String createdAt;
+    @Column(name = "human_notes", columnDefinition = "TEXT")
+    private String humanNotes;
 
-    @Column(nullable = false)
-    private String updatedAt;
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
 }

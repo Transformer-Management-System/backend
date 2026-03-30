@@ -1,6 +1,5 @@
 package com.chamikara.spring_backend.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +12,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AnnotationRequest {
     
-    @NotBlank(message = "Annotation ID is required")
     private String annotationId;
     
     @NotNull(message = "X coordinate is required")
@@ -36,7 +34,6 @@ public class AnnotationRequest {
     
     private String comment;
     
-    @NotBlank(message = "Source is required (ai or user)")
     private String source;
     
     private Boolean deleted;
