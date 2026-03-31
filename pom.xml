@@ -102,6 +102,13 @@
 			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
 
+		<!-- OpenAPI / Swagger UI -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.7.0</version>
+		</dependency>
+
 		<!-- AWS SDK v2 - S3 (includes S3Presigner) -->
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
