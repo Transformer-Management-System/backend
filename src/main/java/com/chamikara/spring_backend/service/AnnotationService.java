@@ -155,7 +155,6 @@ public class AnnotationService {
     private AnnotationResponse mapToResponse(Annotation annotation) {
         BoundingBox boundingBox = parseBoundingBox(annotation.getBoundingBox());
         String createdAt = annotation.getCreatedAt() != null ? annotation.getCreatedAt().toString() : null;
-        String label = annotation.getLabel();
 
         return AnnotationResponse.builder()
                 .id(annotation.getId())
@@ -166,8 +165,15 @@ public class AnnotationService {
                 .w(boundingBox.w)
                 .h(boundingBox.h)
                 .confidence(annotation.getConfidenceScore() != null ? annotation.getConfidenceScore().doubleValue() : null)
-                .severity(label)
-                .classification(label)
+                .severity(annotation.getSeverity())
+                .severityScore(annotation.getSeverityScore() != null ? annotation.getSeverityScore().doubleValue() : null)
+                .classification(annotation.getClassification())
+                .area(annotation.getArea())
+                .centroid(annotation.getCentroid())
+                .meanDeltaE(annotation.getMeanDeltaE() != null ? annotation.getMeanDeltaE().doubleValue() : null)
+                .peakDeltaE(annotation.getPeakDeltaE() != null ? annotation.getPeakDeltaE().doubleValue() : null)
+                .meanHsv(annotation.getMeanHsv())
+                .elongation(annotation.getElongation() != null ? annotation.getElongation().doubleValue() : null)
                 .comment(annotation.getHumanNotes())
                 .source(Boolean.TRUE.equals(annotation.getManuallyVerified()) ? "user" : "ai")
                 .deleted(false)

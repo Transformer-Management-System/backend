@@ -129,6 +129,8 @@ public class InspectionService {
                 .status(inspection.getStatus())
                 .maintenanceImage(inspection.getInspectionImageKey())
                 .annotatedImage(inspection.getInspectionImageKey())
+                .imageLevelLabel(inspection.getImageLevelLabel())
+                .anomalyCount(inspection.getAnomalyCount())
                 .build();
     }
 

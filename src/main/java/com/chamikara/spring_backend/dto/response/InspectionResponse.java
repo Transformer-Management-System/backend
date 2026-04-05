@@ -20,9 +20,7 @@ public class InspectionResponse {
     private String notes;
     private String status;
     private String maintenanceImage;
-    private String maintenanceUploadDate;
-    private String maintenanceWeather;
     private String annotatedImage;
-    private String anomalies;
-    private String progressStatus;
+    private String imageLevelLabel;
+    private Integer anomalyCount;
 }

@@ -6,6 +6,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "inspections")
@@ -40,6 +43,19 @@ public class Inspection {
 
     @Column(name = "inspection_image_key")
     private String inspectionImageKey;
+
+    @Column(name = "image_level_label")
+    private String imageLevelLabel;
+
+    @Column(name = "anomaly_count")
+    private Integer anomalyCount;
+
+    @Column(name = "detection_request_id")
+    private String detectionRequestId;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "detection_metrics")
+    private Map<String, Object> detectionMetrics;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;

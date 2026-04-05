@@ -17,4 +17,6 @@ public interface AnnotationRepository extends JpaRepository<Annotation, Long> {
     Optional<Annotation> findByIdAndInspectionId(Long id, Long inspectionId);
     
     void deleteByInspectionId(Long inspectionId);
+
+    void deleteByInspectionIdAndManuallyVerified(Long inspectionId, Boolean manuallyVerified);
 }

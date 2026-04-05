@@ -36,6 +36,35 @@ public class Annotation {
     @Column(name = "bounding_box")
     private Map<String, Double> boundingBox;
 
+    @Column(name = "severity")
+    private String severity;
+
+    @Column(name = "severity_score")
+    private BigDecimal severityScore;
+
+    @Column(name = "classification")
+    private String classification;
+
+    @Column(name = "area")
+    private Integer area;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "centroid")
+    private Map<String, Double> centroid;
+
+    @Column(name = "mean_delta_e")
+    private BigDecimal meanDeltaE;
+
+    @Column(name = "peak_delta_e")
+    private BigDecimal peakDeltaE;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "mean_hsv")
+    private Map<String, Double> meanHsv;
+
+    @Column(name = "elongation")
+    private BigDecimal elongation;
+
     @Column(name = "is_manually_verified")
     @Builder.Default
     private Boolean manuallyVerified = false;

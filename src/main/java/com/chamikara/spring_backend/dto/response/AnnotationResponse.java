@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,7 +22,14 @@ public class AnnotationResponse {
     private Double h;
     private Double confidence;
     private String severity;
+    private Double severityScore;
     private String classification;
+    private Integer area;
+    private Map<String, Double> centroid;
+    private Double meanDeltaE;
+    private Double peakDeltaE;
+    private Map<String, Double> meanHsv;
+    private Double elongation;
     private String comment;
     private String source;
     private Boolean deleted;

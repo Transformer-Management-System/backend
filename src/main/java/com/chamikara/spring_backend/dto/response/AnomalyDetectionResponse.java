@@ -1,6 +1,5 @@
 package com.chamikara.spring_backend.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,24 +7,19 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * Response DTO for FastAPI anomaly detection service
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class AnomalyDetectionResponse {
-    
+
     private String requestId;
-    private String transformerId;
     private String timestamp;
     private String imageLevelLabel;
     private Integer anomalyCount;
     private List<DetectedAnomaly> anomalies;
     private DetectionMetrics metrics;
-    private OverlayImage overlayImage;
-    
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -35,10 +29,16 @@ public class AnomalyDetectionResponse {
         private BoundingBox bbox;
         private Double confidence;
         private String severity;
+        private Double severityScore;
         private String classification;
         private Integer area;
+        private Centroid centroid;
+        private Double meanDeltaE;
+        private Double peakDeltaE;
+        private MeanHsv meanHsv;
+        private Double elongation;
     }
-    
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -49,7 +49,26 @@ public class AnomalyDetectionResponse {
         private Integer width;
         private Integer height;
     }
-    
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class Centroid {
+        private Double x;
+        private Double y;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MeanHsv {
+        private Double h;
+        private Double s;
+        private Double v;
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -57,6 +76,8 @@ public class AnomalyDetectionResponse {
     public static class DetectionMetrics {
         private Double meanSsim;
         private String warpModel;
+        private Boolean warpSuccess;
+        private Double warpScore;
         private Double thresholdPotential;
         private Double thresholdFault;
         private Double basePotential;
@@ -64,16 +85,6 @@ public class AnomalyDetectionResponse {
         private Double sliderPercent;
         private Double scaleApplied;
         private String thresholdSource;
-        private String ratio;
-    }
-    
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class OverlayImage {
-        private String filename;
-        private Long size;
-        private String path;
+        private Double ratio;
     }
 }
