@@ -1519,3 +1519,7 @@ These controllers are only active when the app runs with the `legacy` Spring pro
 - Use the `objectKey` instead.
 - For inspection creation, the backend uses the path transformer id and only requires `inspector` plus a date field in `yyyy-MM-dd` format.
 - For anomaly creation, the required coordinates are `x`, `y`, `w`, and `h`.
+
+## To run
+
+- .\mvnw.cmd spring-boot:run
