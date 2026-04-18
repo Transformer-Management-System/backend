@@ -21,6 +21,7 @@ public class InspectionResponse {
     private String status;
     private String maintenanceImage;
     private String annotatedImage;
+    private String annotatedImageKey;
     private String imageLevelLabel;
     private Integer anomalyCount;
 }

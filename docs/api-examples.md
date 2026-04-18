@@ -193,6 +193,7 @@ Response `201`:
 | `status` | String | |
 | `maintenanceImage` | String | S3 object key |
 | `annotatedImage` | String | Same value as `maintenanceImage` |
+| `annotatedImageKey` | String | S3 key of the AI-generated annotated image (`inspections/annotated/<uuid>.jpg`). `null` until `/analyze` is run and the detect service successfully uploads the image. Use `GET /api/v1/images/generate-download-url?key=<value>` to get a viewable URL. |
 | `imageLevelLabel` | String | `null` until `/analyze` is run; then `"Normal"`, `"Potentially Faulty"`, or `"Faulty"` |
 | `anomalyCount` | Integer | `null` until `/analyze` is run |
 
@@ -208,6 +209,7 @@ Response `201`:
   "status": "COMPLETED",
   "maintenanceImage": "inspections/maintenance/inspect-001.jpg",
   "annotatedImage": "inspections/maintenance/inspect-001.jpg",
+  "annotatedImageKey": "inspections/annotated/3fa85f64-5717-4562-b3fc-2c963f66afa6.jpg",
   "imageLevelLabel": "Potentially Faulty",
   "anomalyCount": 2
 }
@@ -489,9 +491,10 @@ This endpoint acts as a gateway to the anomaly detection microservice. It:
 
 1. Loads the inspection record and its parent transformer from the database.
 2. Generates pre-signed S3 download URLs for both the transformer's baseline image and the inspection's maintenance image.
-3. Sends those URLs (plus optional `slider_percent`) to the detection service via `POST /api/v1/detect`.
-4. Persists the detection results: updates `imageLevelLabel`, `anomalyCount`, `detectionRequestId`, and `detectionMetrics` on the inspection row; deletes all previous AI-generated anomalies for that inspection; saves the new anomaly blobs.
-5. Returns the full detection response.
+3. Generates a pre-signed S3 PUT URL for the AI-annotated output image (`inspections/annotated/<uuid>.jpg`, valid 15 minutes).
+4. Sends the two download URLs, the annotated upload URL, and optional `slider_percent` to the detection service via `POST /api/v1/detect`.
+5. Persists the detection results: updates `imageLevelLabel`, `anomalyCount`, `detectionRequestId`, `detectionMetrics`, and `annotatedImageKey` (only when the detect service confirms a successful upload) on the inspection row; deletes all previous AI-generated anomalies for that inspection; saves the new anomaly blobs.
+6. Returns the full detection response.
 
 **Error cases:**
 
@@ -526,6 +529,7 @@ The full response from the detection microservice is forwarded and wrapped in `A
 | `anomalyCount` | Integer | Total anomaly blobs detected |
 | `anomalies` | `DetectedAnomaly[]` | Per-blob details (see below) |
 | `metrics` | `DetectionMetrics` | Pipeline diagnostics (see below) |
+| `annotatedImageKey` | String | S3 object key of the AI-generated annotated image (e.g. `inspections/annotated/<uuid>.jpg`). `null` if the detect service did not upload an annotated image. Use `GET /api/v1/images/generate-download-url?key=<value>` to obtain a viewable URL. |
 
 #### DetectedAnomaly
 
@@ -624,7 +628,8 @@ Response `200`:
       "scaleApplied": 1.15,
       "thresholdSource": "slider_scaled",
       "ratio": 1.5
-    }
+    },
+    "annotatedImageKey": "inspections/annotated/3fa85f64-5717-4562-b3fc-2c963f66afa6.jpg"
   },
   "timestamp": "2026-04-05T10:23:46.000"
 }
@@ -1228,7 +1233,7 @@ The body is optional. If present, it only contains `sliderPercent`.
 
 ### AnomalyDetectionResponse
 
-The full response from the detection microservice is forwarded by this backend and wrapped in `ApiResponse`. The `anomalies` array is also persisted to the database — re-running `/analyze` replaces all previous AI-detected anomalies for that inspection.
+The full response from the detection microservice is forwarded by this backend and wrapped in `ApiResponse`. The `anomalies` array is also persisted to the database — re-running `/analyze` replaces all previous AI-detected anomalies for that inspection. `annotatedImageKey` is present when the detect service successfully uploaded the annotated image to S3.
 
 ```json
 {
@@ -1236,6 +1241,7 @@ The full response from the detection microservice is forwarded by this backend a
   "timestamp": "2026-04-05T10:23:45.123456",
   "imageLevelLabel": "Potentially Faulty",
   "anomalyCount": 2,
+  "annotatedImageKey": "inspections/annotated/3fa85f64-5717-4562-b3fc-2c963f66afa6.jpg",
   "anomalies": [
     {
       "id": "anomaly_1",
@@ -1336,7 +1342,8 @@ Response:
       "scaleApplied": 1.15,
       "thresholdSource": "slider_scaled",
       "ratio": 1.5
-    }
+    },
+    "annotatedImageKey": "inspections/annotated/3fa85f64-5717-4562-b3fc-2c963f66afa6.jpg"
   },
   "timestamp": "2026-04-05T10:23:46.000"
 }

@@ -19,6 +19,7 @@ public class AnomalyDetectionResponse {
     private Integer anomalyCount;
     private List<DetectedAnomaly> anomalies;
     private DetectionMetrics metrics;
+    private String annotatedImageKey;
 
     @Data
     @NoArgsConstructor

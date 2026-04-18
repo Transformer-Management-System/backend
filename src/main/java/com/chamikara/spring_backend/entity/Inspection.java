@@ -57,6 +57,9 @@ public class Inspection {
     @Column(name = "detection_metrics")
     private Map<String, Object> detectionMetrics;
 
+    @Column(name = "annotated_image_key")
+    private String annotatedImageKey;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 

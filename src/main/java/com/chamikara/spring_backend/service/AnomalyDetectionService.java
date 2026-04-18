@@ -64,20 +64,25 @@ public class AnomalyDetectionService {
         String baselineUrl = s3Service.generateDownloadUrl(baselineKey);
         String maintenanceUrl = s3Service.generateDownloadUrl(maintenanceKey);
 
-        AnomalyDetectionResponse response = callDetectionService(baselineUrl, maintenanceUrl, sliderPercent);
+        S3Service.PresignedUpload annotatedUpload = s3Service.generateUploadUrl(
+                "jpg", "inspections/annotated");
 
-        saveDetectionResults(inspection, response);
+        AnomalyDetectionResponse response = callDetectionService(
+                baselineUrl, maintenanceUrl, annotatedUpload.uploadUrl(), sliderPercent);
+
+        saveDetectionResults(inspection, response, annotatedUpload.objectKey());
 
         return response;
     }
 
     private AnomalyDetectionResponse callDetectionService(
-            String baselineUrl, String maintenanceUrl, Double sliderPercent) {
+            String baselineUrl, String maintenanceUrl, String annotatedUploadUrl, Double sliderPercent) {
         log.info("Calling anomaly detection microservice");
 
         Map<String, Object> requestBody = new LinkedHashMap<>();
         requestBody.put("baseline_url", baselineUrl);
         requestBody.put("maintenance_url", maintenanceUrl);
+        requestBody.put("annotated_upload_url", annotatedUploadUrl);
         if (sliderPercent != null) {
             requestBody.put("slider_percent", sliderPercent);
         }
@@ -96,8 +101,8 @@ public class AnomalyDetectionService {
                 throw new ServiceException("Detection service returned an empty response");
             }
 
-            log.info("Detection completed — imageLevelLabel: {}, anomalyCount: {}",
-                    response.getImageLevelLabel(), response.getAnomalyCount());
+            log.info("Detection completed — imageLevelLabel: {}, anomalyCount: {}, annotatedImageKey: {}",
+                    response.getImageLevelLabel(), response.getAnomalyCount(), response.getAnnotatedImageKey());
             return response;
 
         } catch (WebClientResponseException ex) {
@@ -111,12 +116,21 @@ public class AnomalyDetectionService {
         }
     }
 
-    private void saveDetectionResults(Inspection inspection, AnomalyDetectionResponse response) {
+    private void saveDetectionResults(Inspection inspection, AnomalyDetectionResponse response,
+            String annotatedObjectKey) {
         // Update inspection-level metadata
         inspection.setImageLevelLabel(response.getImageLevelLabel());
         inspection.setAnomalyCount(response.getAnomalyCount());
         inspection.setDetectionRequestId(response.getRequestId());
         inspection.setDetectionMetrics(mapMetrics(response.getMetrics()));
+        // Persist annotated image key only if the detect service confirms upload succeeded
+        if (response.getAnnotatedImageKey() != null && !response.getAnnotatedImageKey().isBlank()) {
+            inspection.setAnnotatedImageKey(annotatedObjectKey);
+            log.info("Annotated image saved at key: {}", annotatedObjectKey);
+        } else {
+            log.warn("Detect service did not confirm annotated image upload for inspection: {}",
+                    inspection.getId());
+        }
         inspectionRepository.save(inspection);
 
         // Remove previous AI-detected anomalies (keep manual ones)
