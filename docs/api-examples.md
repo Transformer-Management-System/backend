@@ -506,7 +506,7 @@ The body is entirely optional. Omit it or send `{}` when no slider value is need
 
 | Field | Type | Required | Notes |
 | --- | --- | --- | --- |
-| `sliderPercent` | Double | No | Threshold sensitivity. Range `0.0 – 100.0`. `0` = most sensitive; `100` = least sensitive. Omit for adaptive SSIM-based defaults. |
+| `sliderPercent` | Double | No | Threshold sensitivity. Range `0.0 – 100.0`. `0` = least sensitive; `100` = most sensitive. Omit for adaptive SSIM-based defaults. |
 
 ```json
 {
